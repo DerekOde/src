@@ -23,15 +23,22 @@ public class TransactionManager {
     }
 
     public String displayTransactionSummary() {
-        System.out.println("Transaction Summary");
-        System.out.println("===================");
+        StringBuilder summaryBuilder = new StringBuilder();
+        summaryBuilder.append("Transaction Summary\n");
+        summaryBuilder.append("===================\n");
 
-        for (Transaction transaction : this.transactions) {
-            System.out.println(transaction.getItem() + " - " + transaction.getPrice() + " - " + transaction.getTime());
+        for (Transaction transaction : transactions) {
+            summaryBuilder.append(transaction.getItem())
+                    .append(" - ")
+                    .append(transaction.getPrice())
+                    .append(" - ")
+                    .append(transaction.getTime())
+                    .append("\n");
         }
 
-        System.out.println();
-        return null;
+        summaryBuilder.append("\n");
+
+        return summaryBuilder.toString();
     }
 
 }

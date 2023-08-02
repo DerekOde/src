@@ -271,9 +271,10 @@ public class VendingMachine {
      * Displays the transaction summary of the vending machine.
      */
     public String displayTransactionSummary() {
-        manager.displayTransactionSummary();
-        return null;
+        return manager.displayTransactionSummary();
     }
 
-
+    public TransactionManager getTransactionManager() {
+        return this.manager;
+    }
 }

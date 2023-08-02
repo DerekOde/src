@@ -25,9 +25,9 @@ public class SpecialVendingMachine extends VendingMachine {
 
         // Initialize the customizable products
         customizableProducts = new ArrayList<>();
-        customizableProducts.add(new Smoothie("Apple", 50, 20));
-        customizableProducts.add(new Smoothie("Orange", 60, 35));
-        customizableProducts.add(new Smoothie("Strawberry", 80, 50));
+        customizableProducts.add(new Smoothie("Apple Smoothie", 50, 20));
+        customizableProducts.add(new Smoothie("Orange Smoothie", 60, 35));
+        customizableProducts.add(new Smoothie("Strawberry Smoothie", 80, 50));
     }
 
     // Function to add a customizable product to the vending machine

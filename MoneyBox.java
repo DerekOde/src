@@ -117,13 +117,12 @@ public class MoneyBox {
                     this.setQuantity(denomination, currentQuantity - changeQuantity);
                 }
             }
-            System.out.println("Money collected successfully.");
         } else {
             System.out.println("Unable to collect money. Not enough change in the money box.");
         }
     }
 
-    private void setQuantity(int denomination, int i) {
+    void setQuantity(int denomination, int i) {
         for (int j = 0; j < this.denominationBalance.size(); j++) {
             if (this.denominationBalance.get(j).get(0) == denomination) {
                 this.denominationBalance.get(j).set(1, i);
