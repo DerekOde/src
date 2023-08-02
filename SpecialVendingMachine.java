@@ -11,8 +11,12 @@ public class SpecialVendingMachine extends VendingMachine {
     private VendingMachine vendingMachine;
 
 
-    public SpecialVendingMachine(int slotCount) {
+    public SpecialVendingMachine() {
         super();
+
+        addItem("Apple", 95, 1.0);
+        addItem("Orange", 45, 1.0);
+        addItem("Strawberry", 60, 1.0);
         // Initialize the customizable ingredients
         customizableIngredients = new ArrayList<>();
         customizableIngredients.add(new Fruit("Apple", 95, 1.0));

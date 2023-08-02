@@ -2,6 +2,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * TransactionManager
+ */
 public class TransactionManager {
     private List<Transaction> transactions;
 

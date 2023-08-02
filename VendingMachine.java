@@ -26,15 +26,6 @@ public class VendingMachine {
         moneyBox.addMoney(1000, 10);
         this.slotCount = 0;
         this.slots = new ArrayList<Slot>();
-        slots.add(new Slot("Apple", 70, 10, 10));
-        slots.add(new Slot("Banana", 100, 5, 10));
-        slots.add(new Slot("Orange", 80, 15, 10));
-        slots.add(new Slot("Pear", 90, 15, 10));
-        slots.add(new Slot("Peach", 120, 15, 10));
-        slots.add(new Slot("Grape", 60, 1, 10));
-        slots.add(new Slot("Strawberry", 50, 10, 10));
-        slots.add(new Slot("Blueberry", 40, 1, 10));
-        slots.add(new Slot("Raspberry", 30, 1, 10));
         this.manager = new TransactionManager();
     }
 
@@ -72,23 +63,19 @@ public class VendingMachine {
      * @return true if the item is added successfully, false if the item already exists or the vending machine is full
      */
     public boolean addItem(String name, int calories, double price) {
-        System.out.println("Name:" + name + " Calories:" + calories + " Price:" + price);
         for (int i = 0; i < this.slots.size(); i++) {
-            if (this.slots.get(i).getItem().getName().equals(name)) {
-                System.out.println("Item already exists in the vending machine.");
-                return false;
+            Item item = this.slots.get(i).getItem();
+            if (item != null && item.getName().equals(name)) {
+                return false; // Item already exists in the vending machine.
             }
         }
         if (this.slots.size() < this.slotCount) {
             Slot newSlot = new Slot(name, calories, price, 0);
             this.slots.add(newSlot);
-            System.out.println("added successfully");
-            return true;
+            return true; // Added successfully.
         } else {
-            System.out.println("Vending machine is full.");
-            return false;
+            return false; // Vending machine is full.
         }
-
     }
 
     /**
@@ -280,6 +267,9 @@ public class VendingMachine {
         this.moneyBox.replenishDenomination(denomination, quantity);
     }
 
+    /**
+     * Displays the transaction summary of the vending machine.
+     */
     public String displayTransactionSummary() {
         manager.displayTransactionSummary();
         return null;

@@ -32,7 +32,6 @@ public class VendingMachineGUI {
                         }
                     }
                 });
-
                 testButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -43,7 +42,6 @@ public class VendingMachineGUI {
                         }
                     }
                 });
-
                 maintenanceButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -54,7 +52,6 @@ public class VendingMachineGUI {
                         }
                     }
                 });
-
                 frame.add(createButton);
                 frame.add(testButton);
                 frame.add(maintenanceButton);
@@ -78,7 +75,9 @@ public class VendingMachineGUI {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             int slotCount = Integer.parseInt(slotCountField.getText().trim());
-                            currentMachine = new SpecialVendingMachine(slotCount);
+                            currentMachine = new SpecialVendingMachine();
+                            currentMachine.setSlots(slotCount);
+                            addItemsToVendingMachine(); // New method call to add items directly in the GUI
                             frame.dispose();
                         } catch (NumberFormatException ex) {
                             JOptionPane.showMessageDialog(frame, "Invalid input. Please enter a valid number of slots.");
@@ -95,217 +94,305 @@ public class VendingMachineGUI {
         });
     }
 
-    public void testFeatures() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame("Test Vending Machine");
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.setSize(400, 200);
-                frame.setLayout(new GridLayout(2, 1));
+    // New method to add items directly in the GUI
+    private void addItemsToVendingMachine() {
+        JFrame addItemFrame = new JFrame("Add Items to Vending Machine");
+        addItemFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addItemFrame.setSize(400, 400);
+        addItemFrame.setLayout(new GridLayout(0, 2));
 
-                JButton purchaseItemButton = new JButton("Purchase an Item");
-                JButton purchaseSmoothieButton = new JButton("Purchase a Customizable Smoothie");
+        JButton addItemButton = new JButton("Add Item");
+        JButton finishButton = new JButton("Finish");
 
-                purchaseItemButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (currentMachine != null) {
-                            ArrayList<Item> items = currentMachine.displayItems();
-                            if (items.isEmpty()) {
-                                JOptionPane.showMessageDialog(frame, "No items available in the vending machine.");
+        addItemButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JTextField nameField = new JTextField();
+                JTextField caloriesField = new JTextField();
+                JTextField priceField = new JTextField();
+
+                Object[] message = {
+                        "Name:", nameField,
+                        "Calories:", caloriesField,
+                        "Price:", priceField
+                };
+
+                int option = JOptionPane.showConfirmDialog(addItemFrame, message, "Add Item", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String name = nameField.getText().trim();
+                    String caloriesText = caloriesField.getText().trim();
+                    String priceText = priceField.getText().trim();
+
+                    if (name.isEmpty() || !name.matches("^[a-zA-Z]+$")) {
+                        JOptionPane.showMessageDialog(addItemFrame, "Invalid name. Please enter a valid name (letters only).");
+                    } else {
+                        try {
+                            int calories = Integer.parseInt(caloriesText);
+                            double price = Double.parseDouble(priceText);
+                            if (calories < 0 || price < 0) {
+                                JOptionPane.showMessageDialog(addItemFrame, "Invalid calories or price. Please enter non-negative values.");
                             } else {
-                                String[] itemNames = new String[items.size()];
-                                for (int i = 0; i < items.size(); i++) {
-                                    itemNames[i] = items.get(i).getName() + " ($" + items.get(i).getPrice() + ")";
-                                }
-
-                                String selectedItem = (String) JOptionPane.showInputDialog(null,
-                                        "Choose an item:", "Item Selection", JOptionPane.QUESTION_MESSAGE,
-                                        null, itemNames, itemNames[0]);
-
-                                if (selectedItem != null) {
-                                    Item chosenItem = null;
-                                    for (Item item : items) {
-                                        if (selectedItem.equals(item.getName() + " ($" + item.getPrice() + ")")) {
-                                            chosenItem = item;
-                                            break;
-                                        }
-                                    }
-
-                                    if (chosenItem != null) {
-                                        double price = chosenItem.getPrice();
-                                        String paymentInput = JOptionPane.showInputDialog(
-                                                null,
-                                                "Cost of " + chosenItem.getName() + ": $" + price + "\nEnter your payment amount:"
-                                        );
-
-                                        try {
-                                            double payment = Double.parseDouble(paymentInput);
-                                            if (payment < price) {
-                                                JOptionPane.showMessageDialog(frame, "Insufficient funds. Please enter a payment amount greater than or equal to $" + price + ":");
-                                            } else {
-                                                // Calculate change
-                                                double change = payment - price;
-                                                ArrayList<Integer> changeList = currentMachine.getChange((int) change);
-                                                ArrayList<Integer> denominations = currentMachine.getMoneyBox().getAvailableDenominations();
-                                                int totalChange = 0;
-                                                for (int i = 0; i < changeList.size(); i++) {
-                                                    totalChange += changeList.get(i) * denominations.get(i);
-                                                }
-                                                if (totalChange == change) {
-                                                    StringBuilder changeDetails = new StringBuilder();
-                                                    changeDetails.append("Your change is: \n");
-                                                    for (int i = 0; i < changeList.size(); i++) {
-                                                        if (changeList.get(i) != 0) {
-                                                            changeDetails.append(changeList.get(i)).append(" ").append(denominations.get(i)).append(" peso bills\n");
-                                                        }
-                                                    }
-                                                    JOptionPane.showMessageDialog(null, changeDetails.toString());
-                                                } else {
-                                                    JOptionPane.showMessageDialog(frame, "Error in dispensing change. Please try again.");
-                                                }
-                                            }
-                                        } catch (NumberFormatException ex) {
-                                            JOptionPane.showMessageDialog(frame, "Invalid input. Please enter a valid payment amount.");
-                                        }
-                                    }
+                                if (currentMachine.addItem(name, calories, price)) {
+                                    JOptionPane.showMessageDialog(addItemFrame, "Item added successfully!");
+                                } else {
+                                    JOptionPane.showMessageDialog(addItemFrame, "Item could not be added. It is either a duplicate item or the vending machine is full.");
                                 }
                             }
-                        } else {
-                            JOptionPane.showMessageDialog(frame, "No vending machine has been created yet.");
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(addItemFrame, "Invalid input. Please enter valid numbers for calories and price.");
                         }
                     }
-                });
-
-                purchaseSmoothieButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (currentMachine != null) {
-                            ArrayList<Smoothie> smoothies = currentMachine.getCustomizableProducts();
-                            if (smoothies.isEmpty()) {
-                                JOptionPane.showMessageDialog(frame, "No customizable smoothies available.");
-                            } else {
-                                String[] smoothieNames = new String[smoothies.size()];
-                                for (int i = 0; i < smoothies.size(); i++) {
-                                    smoothieNames[i] = smoothies.get(i).getName() + " ($" + smoothies.get(i).getPrice() + ")";
-                                }
-
-                                String selectedSmoothie = (String) JOptionPane.showInputDialog(null,
-                                        "Choose a smoothie:", "Smoothie Selection", JOptionPane.QUESTION_MESSAGE,
-                                        null, smoothieNames, smoothieNames[0]);
-
-                                if (selectedSmoothie != null) {
-                                    Smoothie chosenSmoothie = null;
-                                    for (Smoothie smoothie : smoothies) {
-                                        if (selectedSmoothie.equals(smoothie.getName() + " ($" + smoothie.getPrice() + ")")) {
-                                            chosenSmoothie = smoothie;
-                                            break;
-                                        }
-                                    }
-
-                                    if (chosenSmoothie != null) {
-                                        ArrayList<Fruit> ingredients = currentMachine.getCustomizableIngredients();
-                                        if (ingredients.isEmpty()) {
-                                            JOptionPane.showMessageDialog(frame, "No customizable ingredients available.");
-                                        } else {
-                                            String[] ingredientNames = new String[ingredients.size()];
-                                            for (int i = 0; i < ingredients.size(); i++) {
-                                                ingredientNames[i] = ingredients.get(i).getName() + " ($" + ingredients.get(i).getPrice() + ")";
-                                            }
-
-                                            ArrayList<Fruit> chosenIngredients = new ArrayList<>();
-                                            while (true) {
-                                                String selectedIngredient = (String) JOptionPane.showInputDialog(null,
-                                                        "Choose an ingredient (Press Cancel to finish selecting):", "Ingredient Selection",
-                                                        JOptionPane.QUESTION_MESSAGE, null, ingredientNames, ingredientNames[0]);
-
-                                                if (selectedIngredient == null) {
-                                                    break;
-                                                }
-
-                                                Fruit chosenFruit = null;
-                                                for (Fruit fruit : ingredients) {
-                                                    if (selectedIngredient.equals(fruit.getName() + " ($" + fruit.getPrice() + ")")) {
-                                                        chosenFruit = fruit;
-                                                        break;
-                                                    }
-                                                }
-
-                                                if (chosenFruit != null) {
-                                                    chosenIngredients.add(chosenFruit);
-                                                }
-                                            }
-
-                                            if (!chosenIngredients.isEmpty()) {
-                                                // Calculate the total price of the customizable smoothie
-                                                double totalPrice = chosenSmoothie.getPrice();
-                                                for (Fruit ingredient : chosenIngredients) {
-                                                    totalPrice += ingredient.getPrice();
-                                                }
-
-                                                // Show smoothie details and total price to the user
-                                                StringBuilder smoothieDetails = new StringBuilder();
-                                                smoothieDetails.append("Smoothie: ").append(chosenSmoothie.getName()).append("\n");
-                                                smoothieDetails.append("Ingredients: ");
-                                                for (Fruit ingredient : chosenIngredients) {
-                                                    smoothieDetails.append(ingredient.getName()).append(", ");
-                                                }
-                                                smoothieDetails.delete(smoothieDetails.length() - 2, smoothieDetails.length()); // Remove last comma
-                                                smoothieDetails.append("\nTotal Price: $").append(totalPrice);
-
-                                                JOptionPane.showMessageDialog(frame, smoothieDetails.toString());
-
-                                                // Prompt for payment
-                                                while (true) {
-                                                    String paymentInput = JOptionPane.showInputDialog(null, "Enter your payment amount:");
-                                                    try {
-                                                        int payment = Integer.parseInt(paymentInput);
-                                                        if (payment < totalPrice) {
-                                                            JOptionPane.showMessageDialog(frame, "Insufficient payment. Please enter a higher amount.");
-                                                        } else {
-                                                            // Calculate change
-                                                            int change = payment - (int) totalPrice;
-                                                            ArrayList<Integer> changeList = currentMachine.getChange(change);
-                                                            ArrayList<Integer> denominations = currentMachine.getMoneyBox().getAvailableDenominations();
-                                                            int totalChange = 0;
-                                                            for (int i = 0; i < changeList.size(); i++) {
-                                                                totalChange += changeList.get(i) * denominations.get(i);
-                                                            }
-                                                            if (totalChange == change) {
-                                                                StringBuilder changeDetails = new StringBuilder();
-                                                                changeDetails.append("Your change is: \n");
-                                                                for (int i = 0; i < changeList.size(); i++) {
-                                                                    if (changeList.get(i) != 0) {
-                                                                        changeDetails.append(changeList.get(i)).append(" ").append(denominations.get(i)).append(" peso bills\n");
-                                                                        break;
-                                                                    }
-                                                                }
-                                                                JOptionPane.showMessageDialog(null, changeDetails.toString());
-                                                            }
-                                                            break;
-                                                        }
-                                                    } catch (NumberFormatException ex) {
-                                                        JOptionPane.showMessageDialog(frame, "Invalid input. Please enter a valid payment amount.");
-                                                    }
-                                                }
-                                            } else {
-                                                JOptionPane.showMessageDialog(frame, "No valid ingredients chosen. Purchase canceled.");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(frame, "No vending machine has been created yet.");
-                        }
-                    }
-                });
-
-                frame.add(purchaseItemButton);
-                frame.add(purchaseSmoothieButton);
-                frame.setVisible(true);
+                }
             }
         });
+
+        finishButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Show quantity input dialog for each item
+                for (int i = 0; i < currentMachine.getSlots().size(); i++) {
+                    String itemName = currentMachine.getSlots().get(i).getItem().getName();
+                    while (true) {
+                        String quantityInput = JOptionPane.showInputDialog(addItemFrame, "Please enter the quantity of " + itemName + ":");
+                        try {
+                            int quantity = Integer.parseInt(quantityInput);
+                            if (quantity >= 0) {
+                                if (currentMachine.setQuantity(itemName, quantity)) {
+                                    break;
+                                } else {
+                                    JOptionPane.showMessageDialog(addItemFrame, "Invalid quantity. Please try again.");
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(addItemFrame, "Invalid quantity. Please enter a number greater than or equal to 0.");
+                            }
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(addItemFrame, "Invalid input. Please enter a valid integer.");
+                        }
+                    }
+                }
+
+                addItemFrame.dispose();
+            }
+        });
+
+        addItemFrame.add(addItemButton);
+        addItemFrame.add(finishButton);
+        addItemFrame.setVisible(true);
+    }
+
+
+    public void testFeatures() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Test Vending Machine");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(400, 200);
+            frame.setLayout(new GridLayout(2, 1));
+
+            JButton purchaseItemButton = new JButton("Purchase an Item");
+            JButton purchaseSmoothieButton = new JButton("Purchase a Customizable Smoothie");
+
+            purchaseItemButton.addActionListener(e -> purchaseItemAction());
+            purchaseSmoothieButton.addActionListener(e -> purchaseSmoothieAction());
+
+            frame.add(purchaseItemButton);
+            frame.add(purchaseSmoothieButton);
+            frame.setVisible(true);
+        });
+    }
+
+    private void purchaseItemAction() {
+        if (currentMachine != null) {
+            ArrayList<Slot> slots = currentMachine.getSlots();
+            if (slots.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No items available in the vending machine.");
+                return;
+            }
+
+            String[] itemNames = slots.stream()
+                    .filter(slot -> !slot.isEmpty())
+                    .map(slot -> slot.getItem().getName() + " ($" + slot.getItem().getPrice() + ")")
+                    .toArray(String[]::new);
+
+            if (itemNames.length == 0) {
+                JOptionPane.showMessageDialog(null, "No items available in the vending machine.");
+                return;
+            }
+
+            String selectedItem = (String) JOptionPane.showInputDialog(null,
+                    "Choose an item:", "Item Selection", JOptionPane.QUESTION_MESSAGE,
+                    null, itemNames, itemNames[0]);
+
+            if (selectedItem != null) {
+                Item chosenItem = slots.stream()
+                        .filter(slot -> !slot.isEmpty())
+                        .map(Slot::getItem)
+                        .filter(item -> selectedItem.equals(item.getName() + " ($" + item.getPrice() + ")"))
+                        .findFirst()
+                        .orElse(null);
+
+                if (chosenItem != null) {
+                    double price = chosenItem.getPrice();
+                    double payment = 0;
+
+                    // Keep prompting for payment until a valid input is provided
+                    while (payment < price) {
+                        String paymentInput = JOptionPane.showInputDialog(null, "Cost of " + chosenItem.getName() + ": $" + price
+                                + "\nEnter your payment amount:");
+
+                        // If the user presses "Cancel" or closes the dialog, return
+                        if (paymentInput == null) {
+                            return;
+                        }
+
+                        try {
+                            payment = Double.parseDouble(paymentInput);
+                            if (payment < price) {
+                                JOptionPane.showMessageDialog(null, "Insufficient funds. Please enter a payment amount greater than or equal to $" + price + ":");
+                            }
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid payment amount.");
+                        }
+                    }
+
+                    // Calculate change
+                    double change = payment - price;
+                    ArrayList<Integer> changeList = currentMachine.getChange((int) change);
+                    ArrayList<Integer> denominations = currentMachine.getMoneyBox().getAvailableDenominations();
+                    int totalChange = 0;
+                    StringBuilder changeDetails = new StringBuilder();
+                    changeDetails.append("Your change is: \n");
+
+                    for (int i = 0; i < changeList.size(); i++) {
+                        if (changeList.get(i) != 0) {
+                            changeDetails.append(changeList.get(i)).append(" ").append(denominations.get(i)).append(" peso bills\n");
+                            totalChange += changeList.get(i) * denominations.get(i);
+                        }
+                    }
+
+                    if (totalChange == change) {
+                        JOptionPane.showMessageDialog(null, changeDetails.toString());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error in dispensing change. Please try again.");
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No vending machine has been created yet.");
+        }
+    }
+    private void purchaseSmoothieAction() {
+        if (currentMachine != null) {
+            ArrayList<Smoothie> smoothies = currentMachine.getCustomizableProducts();
+            if (smoothies.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No customizable smoothies available.");
+                return;
+            }
+
+            String[] smoothieNames = smoothies.stream()
+                    .map(smoothie -> smoothie.getName() + " ($" + smoothie.getPrice() + ")")
+                    .toArray(String[]::new);
+
+            String selectedSmoothie = (String) JOptionPane.showInputDialog(null,
+                    "Choose a smoothie:", "Smoothie Selection", JOptionPane.QUESTION_MESSAGE,
+                    null, smoothieNames, smoothieNames[0]);
+
+            if (selectedSmoothie != null) {
+                Smoothie chosenSmoothie = smoothies.stream()
+                        .filter(smoothie -> selectedSmoothie.equals(smoothie.getName() + " ($" + smoothie.getPrice() + ")"))
+                        .findFirst()
+                        .orElse(null);
+
+                if (chosenSmoothie != null) {
+                    ArrayList<Fruit> ingredients = currentMachine.getCustomizableIngredients();
+                    if (ingredients.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "No customizable ingredients available.");
+                        return;
+                    }
+
+                    String[] ingredientNames = ingredients.stream()
+                            .map(ingredient -> ingredient.getName() + " ($" + ingredient.getPrice() + ")")
+                            .toArray(String[]::new);
+
+                    ArrayList<Fruit> chosenIngredients = new ArrayList<>();
+                    while (true) {
+                        String selectedIngredient = (String) JOptionPane.showInputDialog(null,
+                                "Choose an ingredient (Press Cancel to finish selecting):", "Ingredient Selection",
+                                JOptionPane.QUESTION_MESSAGE, null, ingredientNames, ingredientNames[0]);
+
+                        if (selectedIngredient == null) {
+                            break;
+                        }
+
+                        Fruit chosenFruit = ingredients.stream()
+                                .filter(fruit -> selectedIngredient.equals(fruit.getName() + " ($" + fruit.getPrice() + ")"))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (chosenFruit != null) {
+                            chosenIngredients.add(chosenFruit);
+                        }
+                    }
+
+                    if (!chosenIngredients.isEmpty()) {
+                        // Calculate the total price of the customizable smoothie
+                        double totalPrice = chosenSmoothie.getPrice();
+                        for (Fruit ingredient : chosenIngredients) {
+                            totalPrice += ingredient.getPrice();
+                        }
+
+                        // Show smoothie details and total price to the user
+                        StringBuilder smoothieDetails = new StringBuilder();
+                        smoothieDetails.append("Smoothie: ").append(chosenSmoothie.getName()).append("\n");
+                        smoothieDetails.append("Ingredients: ");
+                        for (Fruit ingredient : chosenIngredients) {
+                            smoothieDetails.append(ingredient.getName()).append(", ");
+                        }
+                        smoothieDetails.delete(smoothieDetails.length() - 2, smoothieDetails.length()); // Remove last comma
+                        smoothieDetails.append("\nTotal Price: $").append(totalPrice);
+
+                        JOptionPane.showMessageDialog(null, smoothieDetails.toString());
+
+                        // Prompt for payment
+                        while (true) {
+                            String paymentInput = JOptionPane.showInputDialog(null, "Enter your payment amount, total price is $" + totalPrice +":");
+                            try {
+                                int payment = Integer.parseInt(paymentInput);
+                                if (payment < totalPrice) {
+                                    JOptionPane.showMessageDialog(null, "Insufficient payment. Please enter a higher amount.");
+                                } else {
+                                    // Calculate change
+                                    int change = payment - (int) totalPrice;
+                                    ArrayList<Integer> changeList = currentMachine.getChange(change);
+                                    ArrayList<Integer> denominations = currentMachine.getMoneyBox().getAvailableDenominations();
+                                    int totalChange = 0;
+                                    for (int i = 0; i < changeList.size(); i++) {
+                                        totalChange += changeList.get(i) * denominations.get(i);
+                                    }
+                                    if (totalChange == change) {
+                                        StringBuilder changeDetails = new StringBuilder();
+                                        changeDetails.append("Your change is: \n");
+                                        for (int i = 0; i < changeList.size(); i++) {
+                                            if (changeList.get(i) != 0) {
+                                                changeDetails.append(changeList.get(i)).append(" ").append(denominations.get(i)).append(" peso bills\n");
+                                                break;
+                                            }
+                                        }
+                                        JOptionPane.showMessageDialog(null, changeDetails.toString());
+                                    }
+                                    break;
+                                }
+                            } catch (NumberFormatException ex) {
+                                JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid payment amount.");
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No valid ingredients chosen. Purchase canceled.");
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No vending machine has been created yet.");
+        }
     }
 
     public void maintenance() {

@@ -42,4 +42,12 @@ public class Slot {
             this.quantity = quantity;
         }
     }
+
+    public boolean isEmpty() {
+        if (item == null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
